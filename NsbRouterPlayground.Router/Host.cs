@@ -79,6 +79,7 @@ namespace NsbRouterPlayground.Router {
          #endregion
 
          #region Routing
+
          var staticRouting = routerConfig.UseStaticRoutingProtocol();
          
          staticRouting.AddForwardRoute(WebApiInterface, BackendInterface);
