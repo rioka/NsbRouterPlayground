@@ -34,7 +34,7 @@ namespace NsbRouterPlayground.WebApi.Features.Vendors {
       }
 
       [HttpPost("")]
-      public async Task<IActionResult> Create() {
+      public async Task<IActionResult> Create(bool failBeforePublish = false, bool failBeforeCommit = false) {
 
          var uid = Guid.NewGuid();
          Vendor vendor = default;
@@ -52,11 +52,20 @@ namespace NsbRouterPlayground.WebApi.Features.Vendors {
             _ctx.Vendors.Add(vendor);
             await _ctx.SaveChangesAsync();
 
+            if (failBeforePublish) {
+               throw new Exception($"Thrown because of {nameof(failBeforePublish)}");
+            }
+
             // Publish message
             await _endpoint.Publish(new VendorCreated() {
                Name = vendor.Name,
                Uid = vendor.UId
             });
+
+            if (failBeforeCommit)
+            {
+               throw new Exception($"Thrown because of {nameof(failBeforeCommit)}");
+            }
 
             scope.Complete();
          }
