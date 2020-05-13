@@ -1,3 +1,4 @@
+using System.Data.SqlClient;
 using System.Reflection;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NsbRouterPlayground.Infrastructure.Persistence;
 
 namespace NsbRouterPlayground.WebApi {
 
@@ -23,6 +25,8 @@ namespace NsbRouterPlayground.WebApi {
       public void ConfigureServices(IServiceCollection services) {
 
          services.AddSingleton<IConfiguration>(Configuration);
+         services.AddScoped<SampleContext>();
+         services.AddScoped(cn => new SqlConnection(Configuration.GetConnectionString("WebApi")));
          services.AddControllers();
       }
 

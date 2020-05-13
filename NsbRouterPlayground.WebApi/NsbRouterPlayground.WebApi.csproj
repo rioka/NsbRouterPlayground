@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NsbRouterPlayground.Infrastructure.Persistence\NsbRouterPlayground.Infrastructure.Persistence.csproj" />
     <ProjectReference Include="..\NsbRouterPlayground.Integration.Messages\NsbRouterPlayground.Integration.Messages.csproj" />
   </ItemGroup>
 

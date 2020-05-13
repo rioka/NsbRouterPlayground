@@ -8,9 +8,8 @@
 |`NsbPlayground.WebApi`| Sample Web API application, publishing a `VendorCreated` event|
 |`NsbPlayground.AdazzleUpdater`| Consumes messages |
 |`NsbPlayground.Infrastructure.Persistence`| Code related to persistence for business data|
-|`NsbPlayground.Core`| Core types |
+|`NsbPlayground.Core`| Definition of domain types|
 |`NsbPlayground.Integration.Messages`| Integration messages|
-
 
 ## Overview
 

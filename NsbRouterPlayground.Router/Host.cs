@@ -1,14 +1,11 @@
 using System;
-using System.Data.Common;
 using System.Data.SqlClient;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using NServiceBus;
 using NServiceBus.Logging;
 using NServiceBus.Router;
 using NServiceBus.Transport.SQLServer;
-using SqlDialect = NServiceBus.SqlDialect;
 
 namespace NsbRouterPlayground.Router {
 
