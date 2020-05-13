@@ -10,6 +10,8 @@
 |`NsbPlayground.Infrastructure.Persistence`| Code related to persistence for business data|
 |`NsbPlayground.Core`| Definition of domain types|
 |`NsbPlayground.Integration.Messages`| Integration messages|
+|`NsbPlayground.Business`| SQL project for business database|
+|`NsbPlayground.Nsb`| SQL project for NServiceBus database|
 
 ## Overview
 
