@@ -2,6 +2,8 @@
 
 ## Structure
 
+Here is a short description of the solution and its projects.
+
 |Project|Description|
 |-|-|
 |`NsbPlayground.Router`| Router, responsible to connect a Web API application and its subscribers|
@@ -72,6 +74,7 @@ These are relevant table in each database
 | |`RouterSubscriptionData`| Not used in this case, as this side of the system does not receive messages |
 | |`NsbRouterPlayground.Router`| Input queue for router; stores messages to be forwarded to other parts of the system |
 |`NsbRouterPlayground.Nsb`|`AdazzleUpdater`| Input queue for AdazzleUpdated; receives events (forwarded by router) AdazzleUpdater is subscribed to|
+||`AdazzleUpdater_OutboxData`| Required when Outbox feature, to avoid processing a message more than once |
 ||`NsbRouterPlayground.Router`| Input queue for Router; receives subscription requests (to be forwarded to publishers) and messages to be forwarded to subscribers|
 ||`RouterSubscriptionData`| Stores subscription messages Router is receiving on behalf of actual subscribers; used by Router to route received messages to final recipient|
 
@@ -85,9 +88,21 @@ These are relevant table in each database
 - `WebApi` register `NsbRouterPlayground.Router` as a subscriber
   - an entry is added in `WebApi_SubscriptionData` (if required)
 
-When a message is published
+##### When a message is published
 
 - `WebApi` adds an entry to `NsbRouterPlayground.Router` in `NsbRouterPlayground.Business` database
 - `NsbRouterPlayground.Router` picks up the message (in `NsbRouterPlayground.Business`) and deliver it to subscribers (currently `AdazzleUpdater` only) 
   in `NsbRouterPlayground.Nsb` database
 - `AdazzleUpdater` process the message
+  - The ID of the incoming message is checked against entries in `AdazzleUpdater_OutboxData`
+    - if no matching item is found, a new entry is added in `AdazzleUpdater_OutboxData` and processed normally
+    - if a matching item is found, it means that same message has already been received, then
+      - if no pending actions are there (serialized in `AdazzleUpdater_OutboxData.Operations`), the handler simply aknowledge the incoming message and it's done
+      - if pending actions are found (e.g. delivering outbound messages)
+        - the action of the handler is not executed
+        - pending action are executed (and eventually marked as done)
+  
+Outbox actually provides *exactly-once-delivery* semantics and consistency guarantee between business actions and messages.
+Please note: if the state of non-transactional resources is updated as part of the action, that change is then "permanent", even if processing eventually fails; 
+for similar scenarios, additional logic should be added (but, again, it may not be enough: in similar cases we can mitigate the problem,
+and eventually provide all context information to help sorting out the problem in a more traditional manner).
