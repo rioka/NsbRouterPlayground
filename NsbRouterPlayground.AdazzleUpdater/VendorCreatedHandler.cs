@@ -9,10 +9,10 @@ namespace NsbRouterPlayground.AdazzleUpdater {
    
       public async Task Handle(VendorCreated message, IMessageHandlerContext context) {
 
-         Console.WriteLine($"Processing {message.GetType()} for client {message.Uid}... ");
+         Console.WriteLine($"Processing {message.GetType().Name} for client {message.Uid}... ");
          await Task.Delay(DateTime.UtcNow.Millisecond);
 
-         Console.WriteLine($"{message.GetType()} for client {message.Uid} processed");
+         Console.WriteLine($"{message.GetType().Name} for client {message.Uid} processed");
       }
    }
 }

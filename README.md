@@ -86,4 +86,7 @@ These are relevant table in each database
 
 When a message is published
 
-- an entry is added to `NsbRouterPlayground.Router`
+- `WebApi` adds an entry to `NsbRouterPlayground.Router` in `NsbRouterPlayground.Business` database
+- `NsbRouterPlayground.Router` picks up the message (in `NsbRouterPlayground.Business`) and deliver it to subscribers (currently `AdazzleUpdater` only) 
+  in `NsbRouterPlayground.Nsb` database
+- `AdazzleUpdater` process the message

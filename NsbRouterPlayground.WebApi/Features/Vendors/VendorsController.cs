@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using NsbRouterPlayground.Integration.Messages.Events;
 using NServiceBus;
 
 namespace NsbRouterPlayground.WebApi.Features.Vendors {
@@ -22,11 +23,17 @@ namespace NsbRouterPlayground.WebApi.Features.Vendors {
          return Ok(new { Id = id });
       }
 
+      [HttpPost("")]
       public async Task<IActionResult> Create() {
          
          var vendor = new {Id = 1, Name = "Sample"};
          var location = new Uri(Url.Link("GetVendorById", new { vendor.Id }));
-         
+
+         await _endpoint.Publish(new VendorCreated() {
+            Name = vendor.Name,
+            Uid = Guid.NewGuid()
+         });
+
          return Created(location, vendor);
       }
    }

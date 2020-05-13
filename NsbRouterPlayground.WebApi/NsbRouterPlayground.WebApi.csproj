@@ -18,4 +18,8 @@
     <Folder Include="Infrastructure\IoC\Installers" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NsbRouterPlayground.Integration.Messages\NsbRouterPlayground.Integration.Messages.csproj" />
+  </ItemGroup>
+
 </Project>
