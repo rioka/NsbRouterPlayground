@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
@@ -23,9 +24,13 @@ namespace NsbRouterPlayground.WebApi.Features.Vendors {
       }
 
       [HttpGet("{id:int}", Name = "GetVendorById")]
-      public IActionResult Get(int id) {
+      public async Task<IActionResult> Get(int id) {
 
-         return Ok(new {Id = id});
+         var vendor = await _ctx.Vendors.FindAsync(id);
+
+         return vendor != null
+            ? (IActionResult) Ok(vendor)
+            : NotFound();
       }
 
       [HttpPost("")]
