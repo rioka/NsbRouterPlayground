@@ -48,7 +48,8 @@ namespace NsbRouterPlayground.Router {
          var webApiInterface = routerConfig.AddInterface<SqlServerTransport>(WebApiInterface, t => {
             t.ConnectionString(webApiConnectionString);
             t.DefaultSchema("nsb");
-            //t.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
+            // two connection strings, would be escalated to distributed otherwise
+            t.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
          });
          var webApiSubscriptionStorage = new SqlSubscriptionStorage(
             () => new SqlConnection(webApiConnectionString),
@@ -66,7 +67,8 @@ namespace NsbRouterPlayground.Router {
          var backendInterface = routerConfig.AddInterface<SqlServerTransport>(BackendInterface, t => {
             t.ConnectionString(backendConnectionString);
             t.DefaultSchema("nsb");
-            //t.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
+            // two connection strings, would be escalated to distributed otherwise
+            t.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
          });
 
          var backendSubscriptionStorage = new SqlSubscriptionStorage(
