@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -68,6 +67,12 @@ namespace NsbRouterPlayground.AdazzleUpdater {
 
                var subscriptions = persistence.SubscriptionSettings();
                subscriptions.CacheFor(TimeSpan.FromMinutes(20));
+
+               // use Outbox to avoid processing messages more than once in case of errors 
+               // at Router when forwarding a message
+               var outboxSettings = endpointConfiguration.EnableOutbox();
+               outboxSettings.KeepDeduplicationDataFor(TimeSpan.FromDays(3));
+               outboxSettings.RunDeduplicationDataCleanupEvery(TimeSpan.FromMinutes(30));
 
                #endregion
 

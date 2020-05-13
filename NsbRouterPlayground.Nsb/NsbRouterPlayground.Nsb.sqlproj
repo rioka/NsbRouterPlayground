@@ -72,5 +72,6 @@
     <Build Include="nsb\Tables\AdazzleUpdater.Delayed.sql" />
     <Build Include="nsb\Tables\AdazzleUpdater_SubscriptionData.sql" />
     <Build Include="Security\nsb.sql" />
+    <Build Include="nsb\Tables\AdazzleUpdater_OutboxData.sql" />
   </ItemGroup>
 </Project>
