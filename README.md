@@ -88,6 +88,8 @@ These are relevant table in each database
 - `WebApi` register `NsbRouterPlayground.Router` as a subscriber
   - an entry is added in `WebApi_SubscriptionData` (if required)
 
+![](./message-flow.png)
+
 ##### When a message is published
 
 - `WebApi` adds an entry to `NsbRouterPlayground.Router` in `NsbRouterPlayground.Business` database
