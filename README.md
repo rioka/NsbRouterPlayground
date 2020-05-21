@@ -70,13 +70,18 @@ These are relevant table in each database
 |-|-|-|
 |`NsbRouterPlayground.Business`|`NsbRouterPlayground.Router`| Input queue for Router, published messages|
 | |`WebApi`| Receives subscription requests (from Router)|
-| |`WebApi_SubscriptionData`| Stored subscriptions for messages published by WebApi (currenly `VendorCreated`) |
+| |`WebApi_SubscriptionData`[^transport-legacy]| Stored subscriptions for messages published by WebApi (currenly `VendorCreated`) |
+| |`SubscriptionRouting`[^transport-v5-or-later]| Subscription data when native pub/sub is supported (`NserviceBus.SqlServer` v5.0 or later)|
 | |`RouterSubscriptionData`| Not used in this case, as this side of the system does not receive messages |
 | |`NsbRouterPlayground.Router`| Input queue for router; stores messages to be forwarded to other parts of the system |
 |`NsbRouterPlayground.Nsb`|`AdazzleUpdater`| Input queue for AdazzleUpdated; receives events (forwarded by router) AdazzleUpdater is subscribed to|
-||`AdazzleUpdater_OutboxData`| Required when Outbox feature, to avoid processing a message more than once |
-||`NsbRouterPlayground.Router`| Input queue for Router; receives subscription requests (to be forwarded to publishers) and messages to be forwarded to subscribers|
-||`RouterSubscriptionData`| Stores subscription messages Router is receiving on behalf of actual subscribers; used by Router to route received messages to final recipient|
+| |`AdazzleUpdater_OutboxData`| Required when Outbox feature, to avoid processing a message more than once |
+| |`NsbRouterPlayground.Router`| Input queue for Router; receives subscription requests (to be forwarded to publishers) and messages to be forwarded to subscribers|
+| |`SubscriptionRouting`[^transport-v5-or-later]| Subscription data when native pub/sub is supported (`NserviceBus.SqlServer` v5.0 or later)|
+| |`RouterSubscriptionData`| Stores subscription messages Router is receiving on behalf of actual subscribers; used by Router to route received messages to final recipient|
+
+[^transport-legacy]: Not required with `NserviceBus.SqlServer` v5.0 or later, unless compatibility is enabled.
+[^transport-v5-or-later]: Only when using `NserviceBus.SqlServer` v5.0 or later
 
 #### Sample flow
 
@@ -108,3 +113,22 @@ Outbox actually provides *exactly-once-delivery* semantics and consistency guara
 Please note: if the state of non-transactional resources is updated as part of the action, that change is then "permanent", even if processing eventually fails; 
 for similar scenarios, additional logic should be added (but, again, it may not be enough: in similar cases we can mitigate the problem,
 and eventually provide all context information to help sorting out the problem in a more traditional manner).
+
+## Issues when updating 
+
+When updating packages, Router started throwing an exception on startup; error was caused by changes in 
+`NServiceBus` v7.3.0, which caused any `NServiceBus.Router` prior v3.8.0 to fail. To make things more
+complicated, the issue was not in `NServiceBus.Router` itself, rather in its dependency `NServiceBus.Raw` (v3.0.2): 
+an updated version of the package was required (v3.8.0).
+
+Since those are community packages (though maintained by Particular's staff), the dependency chain somewhere 
+broke in between.
+
+This is the dependency map
+
+- if `NServiceBus` v7.3.0 is used 
+  - (at least) `NServiceBus.Router` v3.8.0 must be used, or
+  - an explicit reference to `NServiceBus.Raw` v3.8.0 must be added to the project
+
+Another issue, still under investigation
+- After updating packages, poison queue is no longer created
