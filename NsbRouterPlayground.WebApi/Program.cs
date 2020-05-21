@@ -52,7 +52,7 @@ namespace NsbRouterPlayground.WebApi {
                .Transactions(TransportTransactionMode.SendsAtomicWithReceive)
                .DefaultSchema("nsb");
 
-            var deliverySettings = transport.UseNativeDelayedDelivery();
+            var deliverySettings = transport.NativeDelayedDelivery();
             deliverySettings.DisableTimeoutManagerCompatibility();
 
             // avoid noise in profiler
