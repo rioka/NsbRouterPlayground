@@ -48,13 +48,13 @@ namespace NsbRouterPlayground.AdazzleUpdater {
                   .Transactions(TransportTransactionMode.SendsAtomicWithReceive)
                   .DefaultSchema("nsb");
 
-               var deliverySettings = transport.UseNativeDelayedDelivery();
+               var deliverySettings = transport.NativeDelayedDelivery();
                deliverySettings.DisableTimeoutManagerCompatibility();
 
                // avoid noise in profiler
                deliverySettings.ProcessingInterval(TimeSpan.FromMinutes(2));
-               transport
-                  .WithPeekDelay(TimeSpan.FromMinutes(2));
+               //transport
+               //   .WithPeekDelay(TimeSpan.FromMinutes(2));
 
                #endregion
 
