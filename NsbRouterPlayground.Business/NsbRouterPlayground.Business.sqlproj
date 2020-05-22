@@ -67,13 +67,13 @@
   <ItemGroup>
     <Build Include="nsb\Tables\NsbRouterPlayground.Router.sql" />
     <Build Include="nsb\Tables\poison.sql" />
-    <Build Include="nsb\Tables\RouterSubscriptionData.sql" />
     <Build Include="nsb\Tables\WebApi.sql" />
     <Build Include="nsb\Tables\audit.sql" />
     <Build Include="nsb\Tables\error.sql" />
     <Build Include="nsb\Tables\WebApi.Delayed.sql" />
-    <Build Include="nsb\Tables\WebApi_SubscriptionData.sql" />
     <Build Include="dbo\Tables\Vendors.sql" />
     <Build Include="Security\nsb.sql" />
+    <Build Include="nsb\Tables\SubscriptionRouting.sql" />
+    <Build Include="nsb\Tables\NsbRouterPlayground.Router.Delayed.sql" />
   </ItemGroup>
 </Project>
