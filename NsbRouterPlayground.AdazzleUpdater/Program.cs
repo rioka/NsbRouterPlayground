@@ -53,8 +53,8 @@ namespace NsbRouterPlayground.AdazzleUpdater {
 
                // avoid noise in profiler
                deliverySettings.ProcessingInterval(TimeSpan.FromMinutes(2));
-               transport
-                  .WithPeekDelay(TimeSpan.FromMinutes(2));
+               //transport
+               //   .WithPeekDelay(TimeSpan.FromMinutes(2));
 
                #endregion
 

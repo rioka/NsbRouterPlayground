@@ -48,12 +48,6 @@ namespace NsbRouterPlayground.Router {
             // two connection strings, would be escalated to distributed otherwise
             t.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
          });
-         var webApiSubscriptionStorage = new SqlSubscriptionStorage(
-            () => new SqlConnection(webApiConnectionString),
-            "Router",
-            new NServiceBus.Router.SqlDialect.MsSqlServer("nsb"),
-            TimeSpan.FromMinutes(1));
-         webApiInterface.EnableMessageDrivenPublishSubscribe(webApiSubscriptionStorage);
 
          #endregion
 
@@ -67,13 +61,6 @@ namespace NsbRouterPlayground.Router {
             // two connection strings, would be escalated to distributed otherwise
             t.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
          });
-
-         var backendSubscriptionStorage = new SqlSubscriptionStorage(
-            () => new SqlConnection(backendConnectionString),
-            "Router",
-            new NServiceBus.Router.SqlDialect.MsSqlServer("nsb"),
-            TimeSpan.FromMinutes(1));
-         backendInterface.EnableMessageDrivenPublishSubscribe(backendSubscriptionStorage);
 
          #endregion
 
@@ -90,12 +77,8 @@ namespace NsbRouterPlayground.Router {
          routerConfig.AutoCreateQueues();
 
          try {
+
             _endpoint = NServiceBus.Router.Router.Create(routerConfig);
-
-            // should not be necessary once transport is upgraded to v5 or v6
-            await webApiSubscriptionStorage.Install();
-            await backendSubscriptionStorage.Install();
-
             await _endpoint.Start();
          }
          catch (Exception ex) {
@@ -107,7 +90,7 @@ namespace NsbRouterPlayground.Router {
       public async Task Stop() {
 
          try {
-            // TODO: perform any futher shutdown operations before or after stopping the endpoint
+            // TODO: perform any further shutdown operations before or after stopping the endpoint
             await _endpoint?.Stop();
          }
          catch (Exception ex) {
