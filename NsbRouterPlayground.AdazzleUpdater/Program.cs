@@ -78,7 +78,9 @@ namespace NsbRouterPlayground.AdazzleUpdater {
 
                #region Routing
 
-               var routerConnector = transport.Routing().ConnectToRouter("NsbRouterPlayground.Router");
+               var routerConnector = transport
+                  .Routing()        
+                  .ConnectToRouter("NsbRouterPlayground.Router");
                routerConnector.RegisterPublisher(
                   eventType: typeof(VendorCreated),
                   publisherEndpointName: "WebApi");

@@ -1,5 +1,4 @@
 using System;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using NServiceBus;
@@ -16,8 +15,8 @@ namespace NsbRouterPlayground.Router {
       // TODO: optionally choose a custom logging library
       // https://docs.particular.net/nservicebus/logging/#custom-logging
       // LogManager.Use<TheLoggingFactory>();
-      private static readonly ILog Log = LogManager.GetLogger<Host>();
 
+      private static readonly ILog Log = LogManager.GetLogger<Host>();
       private IRouter _endpoint;
 
       public string EndpointName => "NsbRouterPlayground.Router";
@@ -64,17 +63,18 @@ namespace NsbRouterPlayground.Router {
 
          #endregion
 
+         routerConfig.AutoCreateQueues();
+
          #region Routing
 
          var staticRouting = routerConfig.UseStaticRoutingProtocol();
-         
+
+         // shortcut to 
+         // AddRoute((i, d) => i == incomingInterface), "Interface = " + incomingInterface, null, outgoingInterface);
          staticRouting.AddForwardRoute(WebApiInterface, BackendInterface);
          staticRouting.AddForwardRoute(BackendInterface, WebApiInterface);
 
          #endregion
-
-         // TODO comment out
-         routerConfig.AutoCreateQueues();
 
          try {
 
