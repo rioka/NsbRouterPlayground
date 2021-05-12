@@ -45,7 +45,7 @@ namespace NsbRouterPlayground.Router {
             t.ConnectionString(webApiConnectionString);
             t.DefaultSchema("nsb");
             // two connection strings, would be escalated to distributed otherwise
-            t.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
+            t.Transactions(TransportTransactionMode.ReceiveOnly);
          });
 
          #endregion
@@ -58,7 +58,8 @@ namespace NsbRouterPlayground.Router {
             t.ConnectionString(backendConnectionString);
             t.DefaultSchema("nsb");
             // two connection strings, would be escalated to distributed otherwise
-            t.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
+            //t.Transactions(TransportTransactionMode.SendsAtomicWithReceive);
+            t.Transactions(TransportTransactionMode.ReceiveOnly);
          });
 
          #endregion
