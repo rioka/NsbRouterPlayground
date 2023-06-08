@@ -56,22 +56,24 @@ internal class RouterConfiguration
   /// <param name="config">Application settings</param>
   /// <param name="logger">Logger</param>
   /// <param name="schemaName">Optional name of the database schema to use</param>
-  internal static void AddInterface(NServiceBus.Router.RouterConfiguration routerConfig,
+  internal static void AddInterface(
+    NServiceBus.Router.RouterConfiguration routerConfig,
     string endpointName,
     string connectionStringName,
     IConfiguration config,
     ILogger<RouterConfiguration> logger,
     string schemaName = "dbo")
   {
-
-    if (!string.IsNullOrWhiteSpace(config.GetConnectionString(connectionStringName))) {
+    if (!string.IsNullOrWhiteSpace(config.GetConnectionString(connectionStringName))) 
+    {
       routerConfig.AddInterface<SqlServerTransport>(endpointName, t => {
         t.ConnectionString(config.GetConnectionString(connectionStringName));
         t.DefaultSchema(schemaName);
         t.Transactions(TransportTransactionMode.ReceiveOnly);
       });
     }
-    else {
+    else 
+    {
       logger.LogWarning("Interface for endpointName {Endpoint} can't be added as no connection string is set for {ConnectionStringName}", endpointName, connectionStringName);
     }
   }
@@ -85,14 +87,16 @@ internal class RouterConfiguration
   /// <param name="connectionStringName">Name of the connection string used to verify if a route is defined</param>
   /// <param name="config">Application settings</param>
   /// <param name="logger">Logger</param>
-  internal static void AddRoute(RouteTable staticRouting,
+  internal static void AddRoute(
+    RouteTable staticRouting,
     string endpointName,
     string connectionStringName,
     IConfiguration config,
     ILogger<RouterConfiguration> logger)
   {
 
-    if (!string.IsNullOrWhiteSpace(config.GetConnectionString(connectionStringName))) {
+    if (!string.IsNullOrWhiteSpace(config.GetConnectionString(connectionStringName))) 
+    {
       staticRouting.AddRoute(
         destinationFilter: (iface, destination) =>
           destination.Endpoint.Equals(endpointName, StringComparison.OrdinalIgnoreCase),
@@ -100,7 +104,8 @@ internal class RouterConfiguration
         gateway: null,
         iface: endpointName);
     }
-    else {
+    else 
+    {
       logger.LogWarning("Route for endpointName {Endpoint} can't be added as no connection string is set for {ConnectionStringName}", endpointName, connectionStringName);
     }
   }

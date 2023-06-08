@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NsbRouterPlayground.Router.Internals;
 using NsbRouterPlayground.Router.Internals.Configuration;
 
@@ -36,7 +37,7 @@ internal class Program
       
       serviceCollection.AddSingleton(provider => {
         
-        var logger = provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RouterConfiguration>>();
+        var logger = provider.GetRequiredService<ILogger<RouterConfiguration>>();
         var routerConfig = RouterConfiguration.Build(ctx, logger);
 
         return NServiceBus.Router.Router.Create(routerConfig);
