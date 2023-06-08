@@ -1,29 +1,73 @@
 # Sample project to play with NServiceBus.Router
 
-## Structure
+## Components of the system
 
-Here is a short description of the solution and its projects.
+| Endpoint                        | Notes                                      |
+|---------------------------------|--------------------------------------------|
+| `NsbBridgePlayground.Sender`    |                                            |
+| `NsbBridgePlayground.Receiver`  |                                            |
+| `NsbBridgePlayground.Notifier`  |                                            |
+| `NsbBridgePlayground.Router`    |                                            |
+| `NsbBridgePlayground.Common`    | Messages and infrastructure components     |
+| `NsbBridgePlayground.Bootstrap` | Component to configure and start endpoints |
 
-|Project|Description|
-|-|-|
-|`NsbPlayground.Router`| Router, responsible to connect a Web API application and its subscribers|
-|`NsbPlayground.WebApi`| Sample Web API application, publishing a `VendorCreated` event|
-|`NsbPlayground.AdazzleUpdater`| Consumes messages |
-|`NsbPlayground.Infrastructure.Persistence`| Code related to persistence for business data|
-|`NsbPlayground.Core`| Definition of domain types|
-|`NsbPlayground.Integration.Messages`| Integration messages|
-|`NsbPlayground.Business`| SQL project for business database|
-|`NsbPlayground.Nsb`| SQL project for NServiceBus database|
+## Behavior
 
-## Overview
+### Without the routrer
 
-A Web API application ("WebApi") processes data and publishes an event (`VendorCreated`).
-This application is not aware of any other parts of the system (ir router and subscribers).
+```puml
+@startuml
 
-A router ("NServiceBusPlayground.Router") is an external service, which is responsible to route messages 
-from then publisher and its subscribers. 
+Sender: sends ""CreateVendor"" command
+Sender: processes ""CreateVendorResponse"" message
 
-A sample consumer ("AdazzleUpdater") processes messages (`VendorCreated` so far).
+Receiver: processes ""CreateVendor"" command
+Receiver: publishes ""VendorCreated"" event
+Receiver: replies ""CreateVendorResponse"" message
+
+Notifier: processes ""VendorCreated"" event
+
+Sender --> Receiver : ""CreateVendor""
+Receiver --> Sender : ""CreateVendorResponse""    
+
+Receiver -[dotted]> Notifier : ""VendorCreated""
+```
+
+### Using the router
+
+```puml
+@startuml
+
+legend top right
+| Pattern  | |
+| ""----"" | //Original// message        |
+| ""...."" | Message //moved// by Router |
+endlegend
+
+Sender: sends ""CreateVendor"" command
+Sender: processes ""CreateVendorResponse"" message
+
+Router: forwards ""CreateVendor"" command to ""Receiver""
+Router: forwards ""CreateVendorResponse"" message to ""Sender""
+Router: forwards ""VendorCreated"" event to ""Notifier""
+
+Sender -[#red,dashed]right-> Router : **(1)** ""CreateVendor""
+
+Router -[#red,dotted]right-> Receiver : **(2)** ""CreateVendor""  
+
+Receiver: process ""CreateVendor"" command
+Receiver: publish ""VendorCreated"" event
+Receiver: reply ""CreateVendorResponse"" message
+
+Notifier: process ""VendorCreated"" events
+ 
+Receiver -[#green,dashed]> Router : **(3)** ""VendorCreated""
+Receiver -[#magenta,dashed]> Router : **(3)** ""CreateVendorResponse""
+Router -[#green,dotted]-> Notifier : **(4)** ""VendorCreated""
+Router -[#magenta,dotted]-> Sender : **(4)** ""CreateVendorResponse""
+```
+
+
 
 ### Databases
 
