@@ -1,11 +1,12 @@
 [*]
 # Microsoft .NET properties
 csharp_indent_braces=false
-csharp_new_line_before_open_brace=control_blocks
+csharp_new_line_before_open_brace=control_blocks,methods,types
 
 # ReSharper properties
 resharper_blank_lines_before_control_transfer_statements=1
-resharper_csharp_indent_size=3
+resharper_csharp_indent_size=2
+resharper_csharp_other_braces=end_of_line
 resharper_other_braces=end_of_line
 
 [*.{cs,csproj,xml}]
