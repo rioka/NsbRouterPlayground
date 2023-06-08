@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- explicit reference to NServiceBus not to get some lower version -->
+    <PackageReference Include="NServiceBus" Version="7.8.*" />
+    <PackageReference Include="NServiceBus.Transport.SqlServer" Version="6.3.*" />
+  </ItemGroup>
+
+</Project>
