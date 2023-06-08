@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NsbRouterPlayground.Common"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NsbRouterPlayground.Sender", "NsbRouterPlayground.Sender\NsbRouterPlayground.Sender.csproj", "{5FE841ED-25B6-4BDC-A8C5-ECB7AD845CCC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NsbRouterPlayground.Receiver", "NsbRouterPlayground.Receiver\NsbRouterPlayground.Receiver.csproj", "{732A7773-38B0-4751-AD4E-A203AFC03A4E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,18 @@ Global
 		{5FE841ED-25B6-4BDC-A8C5-ECB7AD845CCC}.Release|x64.Build.0 = Release|Any CPU
 		{5FE841ED-25B6-4BDC-A8C5-ECB7AD845CCC}.Release|x86.ActiveCfg = Release|Any CPU
 		{5FE841ED-25B6-4BDC-A8C5-ECB7AD845CCC}.Release|x86.Build.0 = Release|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Debug|x64.Build.0 = Debug|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Debug|x86.Build.0 = Debug|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Release|x64.ActiveCfg = Release|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Release|x64.Build.0 = Release|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Release|x86.ActiveCfg = Release|Any CPU
+		{732A7773-38B0-4751-AD4E-A203AFC03A4E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

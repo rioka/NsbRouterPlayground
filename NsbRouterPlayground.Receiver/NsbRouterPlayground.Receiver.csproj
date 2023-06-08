@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NServiceBus.Extensions.Hosting" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="appsettings.json" />        
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\NsbRouterPlayground.Bootstrap\NsbRouterPlayground.Bootstrap.csproj" />
+    <ProjectReference Include="..\NsbRouterPlayground.Common\NsbRouterPlayground.Common.csproj" />
+  </ItemGroup>
+  
+</Project>
