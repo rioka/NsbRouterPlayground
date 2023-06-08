@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NsbRouterPlayground.Notifie
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NsbRouterPlayground.Router", "NsbRouterPlayground.Router\NsbRouterPlayground.Router.csproj", "{72E43428-C77C-4B4C-9F6B-04B873A25314}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Endpoints", "Endpoints", "{31857FD4-5E22-4456-9B29-1E9D9BCAD459}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Router", "Router", "{28688CAB-13BE-4362-877B-1CA4C841BE6F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +114,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{10F49B86-1E3B-469B-B0D8-0FA0E566D82F} = {31857FD4-5E22-4456-9B29-1E9D9BCAD459}
+		{72B0E591-3365-45E5-A010-D13EC33BC416} = {31857FD4-5E22-4456-9B29-1E9D9BCAD459}
+		{5FE841ED-25B6-4BDC-A8C5-ECB7AD845CCC} = {31857FD4-5E22-4456-9B29-1E9D9BCAD459}
+		{72E43428-C77C-4B4C-9F6B-04B873A25314} = {28688CAB-13BE-4362-877B-1CA4C841BE6F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7C62327D-2684-4ED0-B022-EA0E8774BCE1}
