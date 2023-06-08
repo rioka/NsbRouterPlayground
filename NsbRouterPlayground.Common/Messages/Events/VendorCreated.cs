@@ -2,7 +2,7 @@
 
 namespace NsbRouterPlayground.Common.Messages.Events; 
 
-[NsbEvent("Processor")]
+[NsbEvent(Endpoints.Receiver)]
 public class VendorCreated {
 
   public Guid Uid { get; set; }

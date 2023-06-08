@@ -2,7 +2,7 @@
 
 public class Endpoints
 {
-  public const string Sender = "Sender"; 
-  public const string OrderProcessor = "Processor"; 
-  public const string Notifier = "Notifier"; 
+  public const string Sender = nameof(Sender); 
+  public const string Receiver = nameof(Receiver); 
+  public const string Notifier = nameof(Notifier); 
 }
