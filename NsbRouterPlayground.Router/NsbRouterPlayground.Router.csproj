@@ -8,5 +8,19 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.*" />
     <PackageReference Include="NServiceBus.Router" Version="3.9.*" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="appsettings.json" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\NsbRouterPlayground.Common\NsbRouterPlayground.Common.csproj" />
+  </ItemGroup>
   
 </Project>
