@@ -33,7 +33,7 @@ internal class Program
       
       serviceCollection.AddSingleton(provider => {
         
-        var logger = provider.GetService<Microsoft.Extensions.Logging.ILogger<RouterConfiguration>>();
+        var logger = provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RouterConfiguration>>();
         var routerConfig = RouterConfiguration.Build(ctx, logger);
 
         return NServiceBus.Router.Router.Create(routerConfig);
