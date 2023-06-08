@@ -9,7 +9,10 @@ internal class Program
 {
   public static async Task Main(string[] args)
   {
-    Console.WriteLine("Hello, World!");
+    var host = CreateHostBuilder(args)
+      .Build();
+
+    await host.RunAsync();
   }
 
   internal static IHostBuilder CreateHostBuilder(string[] args)
