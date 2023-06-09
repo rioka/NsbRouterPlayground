@@ -15,33 +15,18 @@ internal class RouterConfiguration
 
     var config = ctx.Configuration;
 
-    // Keeping it simple - leaving interfaces and routes here for now until we know more about routing rules
-    // We can then separate Interfaces and routes per Endpoint/Application
-    // AddInterface(routerConfig, EndpointDirectory.MDM, EndpointConnectionString.MDM, config, logger, "nsb");
-    // AddInterface(routerConfig, EndpointDirectory.FINANCIALBRIDGE, EndpointConnectionString.FINANCIALBRIDGE, config, logger, "nsb");
-    // // AddInterface(routerConfig, EndpointDirectory.VIMM, EndpointConnectionString.VIMM, config, logger, "nsb");
-    // AddInterface(routerConfig, EndpointDirectory.MEDIA_MODULE, EndpointConnectionString.MEDIA_MODULE, config, logger, "nsb");
-    // AddInterface(routerConfig, EndpointDirectory.FDM, EndpointConnectionString.FDM, config, logger, "nsb");
-    // AddInterface(routerConfig, EndpointDirectory.RDM, EndpointConnectionString.RDM, config, logger, "nsb");
-    // AddInterface(routerConfig, EndpointDirectory.USER_STORE, EndpointConnectionString.UserStore, config, logger, "nsb");
-    // AddInterface(routerConfig, EndpointDirectory.VENDOR_INBOX, EndpointConnectionString.VENDOR_INBOX, config, logger, "nsb");
-    //
-    // // The account will need to have permissions to create queues, otherwise we should have default scripts that need be added to projects to setup router tables.
-    // // Question: does this make sense at all?
-    // // i.e. do we want the account to have that privilege?
-    // // Moreover, now all DB have router tables in their database projects
-    // routerConfig.AutoCreateQueues();
-    //
-    // var staticRouting = routerConfig.UseStaticRoutingProtocol();
-    //
-    // AddRoute(staticRouting, EndpointDirectory.MDM, EndpointConnectionString.MDM, config, logger);
-    // AddRoute(staticRouting, EndpointDirectory.FINANCIALBRIDGE, EndpointConnectionString.FINANCIALBRIDGE, config, logger);
-    // // AddRoute(staticRouting, EndpointDirectory.VIMM, EndpointConnectionString.VIMM, config, logger);
-    // AddRoute(staticRouting, EndpointDirectory.MEDIA_MODULE, EndpointConnectionString.MEDIA_MODULE, config, logger);
-    // AddRoute(staticRouting, EndpointDirectory.FDM, EndpointConnectionString.FDM, config, logger);
-    // AddRoute(staticRouting, EndpointDirectory.RDM, EndpointConnectionString.RDM, config, logger);
-    // AddRoute(staticRouting, EndpointDirectory.USER_STORE, EndpointConnectionString.UserStore, config, logger);
-    // AddRoute(staticRouting, EndpointDirectory.VENDOR_INBOX, EndpointConnectionString.VENDOR_INBOX, config, logger);
+    AddInterface(routerConfig, Endpoints.Receiver, "Receiver", config, logger, "nsb");
+    AddInterface(routerConfig, Endpoints.Sender, "Sender", config, logger, "nsb");
+    AddInterface(routerConfig, Endpoints.Notifier, "Notifier", config, logger, "nsb");
+    
+    // Do not do this in a production environment!
+    routerConfig.AutoCreateQueues();
+    
+    var staticRouting = routerConfig.UseStaticRoutingProtocol();
+    
+    AddRoute(staticRouting, Endpoints.Receiver, "Receiver", config, logger);
+    AddRoute(staticRouting, Endpoints.Sender, "Sender", config, logger);
+    AddRoute(staticRouting, Endpoints.Notifier, "Notifier", config, logger);
 
     return routerConfig;
   }
