@@ -164,7 +164,7 @@ As we can see:
 node Sender {
 
   queue router as RtrS
-  queue sender as SQ
+  queue "input queue" as SQ
 
   actor Handler as SH
 }
@@ -172,7 +172,7 @@ node Sender {
 node Receiver {
 
   queue router as RtrR
-  queue receiver as RQ
+  queue "input queue"  as RQ
 
   actor Handler as RH
 }
@@ -180,12 +180,15 @@ node Receiver {
 node Notifier {
 
   queue router as RtrN
-  queue notifier as NQ
+  queue "input queue"  as NQ
 
   actor Handler as NH
 }
 
 component Router
+'entity Start as St
+
+'St -r-> RtrS
 
 RtrS --r[#green]-> Router : **(1)**
 Router -r[#green]> RQ : **(2)**
