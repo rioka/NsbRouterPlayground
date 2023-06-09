@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using NsbRouterPlayground.Common;
+using NsbRouterPlayground.Common.Messages;
 using NsbRouterPlayground.Common.Messages.Commands;
 using NsbRouterPlayground.Common.Messages.Events;
 using NServiceBus;

@@ -1,4 +1,4 @@
-﻿namespace NsbRouterPlayground.Common;
+﻿namespace NsbRouterPlayground.Common.Messages;
 
 public class CreateVendorResponse
 {
