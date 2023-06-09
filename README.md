@@ -1,134 +1,225 @@
 # Sample project to play with NServiceBus.Router
 
-## Structure
+## Components of the system
 
-Here is a short description of the solution and its projects.
+| Endpoint                        | Notes                                      |
+|---------------------------------|--------------------------------------------|
+| `NsbBridgePlayground.Sender`    |                                            |
+| `NsbBridgePlayground.Receiver`  |                                            |
+| `NsbBridgePlayground.Notifier`  |                                            |
+| `NsbBridgePlayground.Router`    |                                            |
+| `NsbBridgePlayground.Common`    | Messages and infrastructure components     |
+| `NsbBridgePlayground.Bootstrap` | Component to configure and start endpoints |
 
-|Project|Description|
-|-|-|
-|`NsbPlayground.Router`| Router, responsible to connect a Web API application and its subscribers|
-|`NsbPlayground.WebApi`| Sample Web API application, publishing a `VendorCreated` event|
-|`NsbPlayground.AdazzleUpdater`| Consumes messages |
-|`NsbPlayground.Infrastructure.Persistence`| Code related to persistence for business data|
-|`NsbPlayground.Core`| Definition of domain types|
-|`NsbPlayground.Integration.Messages`| Integration messages|
-|`NsbPlayground.Business`| SQL project for business database|
-|`NsbPlayground.Nsb`| SQL project for NServiceBus database|
+## Behavior
 
-## Overview
+### Without the routrer
 
-A Web API application ("WebApi") processes data and publishes an event (`VendorCreated`).
-This application is not aware of any other parts of the system (ir router and subscribers).
+```puml
+@startuml
 
-A router ("NServiceBusPlayground.Router") is an external service, which is responsible to route messages 
-from then publisher and its subscribers. 
+state Sender #44556611
+Sender: sends ""CreateVendor"" command
+Sender: processes ""CreateVendorResponse"" message
 
-A sample consumer ("AdazzleUpdater") processes messages (`VendorCreated` so far).
+state Receiver #66992211
+Receiver: processes ""CreateVendor"" command
+Receiver: publishes ""VendorCreated"" event
+Receiver: replies ""CreateVendorResponse"" message
 
-### Databases
+state Notifier #88112211
+Notifier: processes ""VendorCreated"" event
 
-The system is using two databases 
-- `NsbRouterPlayground.Business`, which stores business data processed by `WebApi` application 
-- `NsbRouterPlayground.Nsb`, which stores data required by NserviceBus (messages and other infrastructure information)
+Sender --> Receiver : ""CreateVendor""
+Receiver --> Sender : ""CreateVendorResponse""    
 
-To avoid dependency on MS DTC, and still have a stable system, a few tables related to NServiceBus
-are stored in `NsbRouterPlayground.Business` database, ie
-- a few tables required by the endpoint hosted in the WebApi application 
-- a few tables required by the router
-To make the separation explicit, these tables are assigned a different SQL schema than other tables.
+Receiver -[dotted]> Notifier : ""VendorCreated""
+```
 
+### Using the router
+
+```puml
+@startuml
+
+legend top right
+| Pattern  | |
+| ""----"" | //Original// message        |
+| ""...."" | Message //moved// by Router |
+endlegend
+
+state Sender #44556611
+Sender: sends ""CreateVendor"" command
+Sender: processes ""CreateVendorResponse"" message
+
+state Router #EEFF2211
+Router: forwards ""CreateVendor"" command to ""Receiver""
+Router: forwards ""CreateVendorResponse"" message to ""Sender""
+Router: forwards ""VendorCreated"" event to ""Notifier""
+
+Sender -[#red,dashed]right-> Router : **(1)** ""CreateVendor""
+
+Router -[#red,dotted]right-> Receiver : **(2)** ""CreateVendor""  
+
+state Receiver #66992211
+Receiver: process ""CreateVendor"" command
+Receiver: publish ""VendorCreated"" event
+Receiver: reply ""CreateVendorResponse"" message
+
+state Notifier #88112211
+Notifier: process ""VendorCreated"" events
+ 
+Receiver -[#green,dashed]> Router : **(3)** ""VendorCreated""
+Receiver -[#magenta,dashed]> Router : **(3)** ""CreateVendorResponse""
+Router -[#green,dotted]-> Notifier : **(4)** ""VendorCreated""
+Router -[#magenta,dotted]-> Sender : **(4)** ""CreateVendorResponse""
+```
 
 ### How it works
 
-Web the WebApi application publishes a message, it simply add an entry in `NsbRouterPlayground.Router` table.
-These two actions happen in the scope of a (local) transaction, so the result is consistent:
-- we cannot have phantom messages, i.e. messages without change being persisted 
-- we cannot have changes without messages being sent
-
-As a separate step (and in a separate process, but this is not mandatory), the router picks up 
-these messages, and dispatches them. During this process, the router will access the two databases, reading
-messages from `NsbRouterPlayground.Business` and forwarding to every subscriber.
-Please note final subscribers are not known to the publisher (ie WebApi application).
-
-In details
-- Subscribers
-  - are aware there is a router, and must be configured properly
-  - must know who is publishing a message
-  - sends a (service) message to the router to subscribe to an event
-- `NsbRouterPlayground.Router`
-  - must be configured to connect (ie route messages) between two (or more) different parts of the system
-  - receives subscriptions requests from subscribers, and register on their behalf to the publisher; please note that 
-    *from the poit of view of the publisher, the router is the subscriber*
-  - receives messages from the publisher, and forward them to subscribers according to its subscription data
-- `WebApi`
-  - receives subscription requests from the router
-  - send message to Router 
-
 These are relevant table in each database
 
-|Database|Table|Used for|
-|-|-|-|
-|`NsbRouterPlayground.Business`|`NsbRouterPlayground.Router`| Input queue for Router, published messages|
-| |`WebApi`| Receives subscription requests (from Router)|
-| |`WebApi_SubscriptionData`[^transport-legacy]| Stored subscriptions for messages published by WebApi (currenly `VendorCreated`) |
-| |`SubscriptionRouting`[^transport-v5-or-later]| Subscription data when native pub/sub is supported (`NserviceBus.SqlServer` v5.0 or later)|
-| |`RouterSubscriptionData`| Not used in this case, as this side of the system does not receive messages |
-| |`NsbRouterPlayground.Router`| Input queue for router; stores messages to be forwarded to other parts of the system |
-|`NsbRouterPlayground.Nsb`|`AdazzleUpdater`| Input queue for AdazzleUpdated; receives events (forwarded by router) AdazzleUpdater is subscribed to|
-| |`AdazzleUpdater_OutboxData`| Required when Outbox feature, to avoid processing a message more than once |
-| |`NsbRouterPlayground.Router`| Input queue for Router; receives subscription requests (to be forwarded to publishers) and messages to be forwarded to subscribers|
-| |`SubscriptionRouting`[^transport-v5-or-later]| Subscription data when native pub/sub is supported (`NserviceBus.SqlServer` v5.0 or later)|
-| |`RouterSubscriptionData`| Stores subscription messages Router is receiving on behalf of actual subscribers; used by Router to route received messages to final recipient|
+| Database                       | Table                  | Used for                                                                                                     |
+|--------------------------------|------------------------|--------------------------------------------------------------------------------------------------------------|
+| `NsbRouterPlayground.Sender`   | `Sender`               | Input queue for `Sender`; receives messages for `Sender`, i.e. replies, subscription requests, ...           |
+|                                | `SubscriptionRouting`  | Subscription data when native pub/sub is supported (`NserviceBus.SqlServer` v5.0 or later)                   |
+|                                | `Router`               | Input queue for router; stores messages to be forwarded to other parts of the system                         |
+| `NsbRouterPlayground.Receiver` | `Receiver`             | Input queue for `Receiver`; receives messages (forwarded by router), e.g. commands `Receiver` should process |
+|                                | `SubscriptionRouting`  | Subscription data when native pub/sub is supported (`NserviceBus.SqlServer` v5.0 or later)                   |
+|                                | `Router`               | Input queue for router; stores messages to be forwarded to other parts of the system                         |
+| `NsbRouterPlayground.Notifier` | `Notifier`             | Input queue for `Notifier`; receives messages (forwarded by router) for `Notifier`, e.g. events              |
+|                                | `SubscriptionRouting`  | Subscription data when native pub/sub is supported (`NserviceBus.SqlServer` v5.0 or later)                   |
+|                                | `Router`               | Input queue for router; stores messages to be forwarded to other parts of the system                         |
 
-[^transport-legacy]: Not required with `NserviceBus.SqlServer` v5.0 or later, unless compatibility is enabled.
-[^transport-v5-or-later]: Only when using `NserviceBus.SqlServer` v5.0 or later
+> Assuming `NserviceBus.SqlServer` v5 or later is used
 
-#### Sample flow
+> `Router` is added by the router, i.e. it is not created as part of the endpoint initialization, as it happens for other tables for the endpoint (assuming `EndpointConfiguration.EnableInstallers` is called, of course). 
 
-- `AdazzleUpdater` starts, and sends a service message to subscribe to `VendorCreated` event.
-  - a message is queued in `NsbRouterPlayground.Router` queue
-- `NsbRouterPlayground.Router` picks up this message and analyzes it
-  - `NsbRouterPlayground.Router` registers `AdazzleUpdater` as a subscriber of `VendorCreated` message
-  - since the actual publisher is `WebApi`, `NsbRouterPlayground.Router` register itself as a subscriber, so a message is queued in `WebApi` input queue 
-- `WebApi` register `NsbRouterPlayground.Router` as a subscriber
-  - an entry is added in `WebApi_SubscriptionData` (if required)
+When an endpoint starts:
 
-![](./message-flow.png)
+- it sends subscription requests for events it handles; since the router is being used, subscription requests are queued into the router queue at the subscriber.
 
-##### When a message is published
+- it configure routes to forwards commands to their respective recipient.
 
-- `WebApi` adds an entry to `NsbRouterPlayground.Router` in `NsbRouterPlayground.Business` database
-- `NsbRouterPlayground.Router` picks up the message (in `NsbRouterPlayground.Business`) and deliver it to subscribers (currently `AdazzleUpdater` only) 
-  in `NsbRouterPlayground.Nsb` database
-- `AdazzleUpdater` process the message
-  - The ID of the incoming message is checked against entries in `AdazzleUpdater_OutboxData`
-    - if no matching item is found, a new entry is added in `AdazzleUpdater_OutboxData` and processed normally
-    - if a matching item is found, it means that same message has already been received, then
-      - if no pending actions are there (serialized in `AdazzleUpdater_OutboxData.Operations`), the handler simply aknowledge the incoming message and it's done
-      - if pending actions are found (e.g. delivering outbound messages)
-        - the action of the handler is not executed
-        - pending action are executed (and eventually marked as done)
-  
-Outbox actually provides *exactly-once-delivery* semantics and consistency guarantee between business actions and messages.
-Please note: if the state of non-transactional resources is updated as part of the action, that change is then "permanent", even if processing eventually fails; 
-for similar scenarios, additional logic should be added (but, again, it may not be enough: in similar cases we can mitigate the problem,
-and eventually provide all context information to help sorting out the problem in a more traditional manner).
+  > When `Sender` sends a `CreateVendor` command, the command is queued in `Router` at `Sender`.  
 
-## Issues when updating 
+> No setup is required for messages sent via `Reply`: the router handles them transparently without any configuration, using additional metadata added to the message.
 
-When updating packages, Router started throwing an exception on startup; error was caused by changes in 
-`NServiceBus` v7.3.0, which caused any `NServiceBus.Router` prior v3.8.0 to fail. To make things more
-complicated, the issue was not in `NServiceBus.Router` itself, rather in its dependency `NServiceBus.Raw` (v3.0.2): 
-an updated version of the package was required (v3.8.0).
+When `Recevier` processes a message, it queues two messages into its local `Router` queue:
 
-Since those are community packages (though maintained by Particular's staff), the dependency chain somewhere 
-broke in between.
+- Event `VendorCreated`
+- Message `CreateVendorResponse`
 
-This is the dependency map
+The router then picks up those messages, and deliver them to their final recipient
 
-- if `NServiceBus` v7.3.0 is used 
-  - (at least) `NServiceBus.Router` v3.8.0 must be used, or
-  - an explicit reference to `NServiceBus.Raw` v3.8.0 must be added to the project
+- `VendorCreated` is forwarded to endpoint `Notifier`
+- `CreateVendorResponse` is forwarded to endpoint `Sender`
 
-Another issue, still under investigation
-- After updating packages, poison queue is no longer created
+## How commands are routed
+
+This is a command as it is initially queued (i.e. stored in `Router` table in `Sender` database)
+
+```json
+{
+    "NServiceBus.MessageId": "c4af2369-96c1-4bf1-bdcc-b01c00ab68fb",
+    "NServiceBus.Bridge.DestinationEndpoint": "Receiver",
+    "NServiceBus.MessageIntent": "Send",
+    "NServiceBus.ConversationId": "47d99773-6ac2-4fde-ad46-b01c00ab68fc",
+    "NServiceBus.CorrelationId": "c4af2369-96c1-4bf1-bdcc-b01c00ab68fb",
+    "NServiceBus.ReplyToAddress": "Sender@[nsb]@[NsbRouterPlayground.Sender]",
+    "NServiceBus.OriginatingMachine": "UKSWL-1691759",
+    "NServiceBus.OriginatingEndpoint": "Sender",
+    "$.diagnostics.originating.hostid": "0bb6caccec7325cdbd53d3817375b672",
+    "NServiceBus.ContentType": "text\/xml",
+    "NServiceBus.EnclosedMessageTypes": "NsbRouterPlayground.Common.Messages.Commands.CreateVendor, NsbRouterPlayground.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "NServiceBus.Version": "7.8.2",
+    "NServiceBus.TimeSent": "2023-06-09 10:24:05:119627 Z"
+}
+```
+
+We can see the additional header `"NServiceBus.Bridge.DestinationEndpoint": "Receiver"`, which tells the router who the final recipient is.
+
+When the router delivers the message to `Receiver`, we can see headers are slightly different:
+
+```json
+{
+  "NServiceBus.MessageId": "c4af2369-96c1-4bf1-bdcc-b01c00ab68fb",
+  "NServiceBus.Bridge.DestinationEndpoint": "Receiver",
+  "NServiceBus.MessageIntent": "Send",
+  "NServiceBus.ConversationId": "47d99773-6ac2-4fde-ad46-b01c00ab68fc",
+  "NServiceBus.CorrelationId": "iface|6|Sender|reply-to|41|Sender@[nsb]@[NsbRouterPlayground.Sender]|id|36|c4af2369-96c1-4bf1-bdcc-b01c00ab68fb",
+  "NServiceBus.ReplyToAddress": "Router@[nsb]@[NsbRouterPlayground.Receiver]",
+  "NServiceBus.OriginatingMachine": "UKSWL-1691759",
+  "NServiceBus.OriginatingEndpoint": "Sender",
+  "$.diagnostics.originating.hostid": "0bb6caccec7325cdbd53d3817375b672",
+  "NServiceBus.ContentType": "text\/xml",
+  "NServiceBus.EnclosedMessageTypes": "NsbRouterPlayground.Common.Messages.Commands.CreateVendor, NsbRouterPlayground.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+  "NServiceBus.Version": "7.8.2",
+  "NServiceBus.TimeSent": "2023-06-09 10:24:05:119627 Z",
+  "NServiceBus.Router.ReplyTo": "Router",
+  "NServiceBus.Bridge.Trace": "via|6|Router"
+}
+```
+
+As we can see:
+
+- `"NServiceBus.CorrelationId"` has been extended, and some data has been added by the router
+- `"NServiceBus.ReplyToAddress"` has been overwritten with the address of the router
+
+```puml
+@startuml
+
+node Sender #44556611 {
+
+  queue router as RtrS
+  queue "input queue" as SQ
+
+  actor Handler as SH
+}
+
+node Receiver #66992211 {
+
+  queue router as RtrR
+  queue "input queue"  as RQ
+
+  actor Handler as RH
+}
+
+node Notifier #88112211 {
+
+  queue router as RtrN
+  queue "input queue"  as NQ
+
+  actor Handler as NH
+}
+
+component Router #EEFF2211 
+'entity Start as St
+
+'St -r-> RtrS
+
+RtrS --r[#green]-> Router : **(1)**
+Router -r[#green]> RQ : **(2)**
+RQ -r[#red]-> RH : **(3)**
+
+RH -r[#brown]-> RtrR : **(4)** 
+
+RtrR --[#orange]> Router : **(5)** 
+Router ---[#orange]> NQ :  **(6)**
+Router ---[#orange]> SQ : **(6)** 
+
+NQ -d[#lightblue]-> NH : **(7)**
+SQ -d[#lightblue]-> SH : **(7)**
+
+legend top left
+| 1 | Router reads command ""CreateVendor""   |
+| 2 | Router forwards command to ""Receiver"" |
+| 3 | ""Receiver"" processes the command      |
+| 4 | ""Receiver"" published ""VendorCreated""\n and replies to ""Sender"" |
+| 5 | Router reads event ""VendorCreated""\n and message ""CreateVendorResponse""    |
+| 6 | Router forwards event to ""Notifier""\n and message to ""Sender""|
+| 7 | ""Notifier"" processes event ""VendorCreated""\n and ""Sender"" processes ""CreateVendorResponse""|
+
+endlegend
+
+@enduml
+```

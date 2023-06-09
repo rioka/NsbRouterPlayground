@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="NServiceBus.Persistence.Sql" Version="6.6.*" />
+    <PackageReference Include="NServiceBus.Router.Connector" Version="3.9.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NsbRouterPlayground.Common\NsbRouterPlayground.Common.csproj" />
+  </ItemGroup>
+
+</Project>

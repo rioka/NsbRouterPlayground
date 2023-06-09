@@ -1,36 +1,50 @@
-using System;
-using System.Linq;
-using System.ServiceProcess;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NsbRouterPlayground.Router.Internals;
+using NsbRouterPlayground.Router.Internals.Configuration;
 
-namespace NsbRouterPlayground.Router {
+namespace NsbRouterPlayground.Router;
 
-   internal static class Program {
+internal class Program
+{
+  public static async Task Main(string[] args)
+  {
+    var host = CreateHostBuilder(args)
+      .Build();
 
-      public static async Task Main(string[] args) {
+    await host.RunAsync();
+  }
 
-         var host = new Host();
+  internal static IHostBuilder CreateHostBuilder(string[] args)
+  {
+    var hb = Host
+      .CreateDefaultBuilder(args)
+      /*
+         Microsoft.Extensions.Hosting.HostBuilder.Build
+         - calls CreateServiceProvider, which calls
+           - serviceCollection.AddSingleton<IHostLifetime, ConsoleLifetime>();
+         So "ConsoleLifetime" is the default.
+         It is safe to call "UseWindowsService" anyway, because it is called after HostBuilder.Build,
+         and possibly overrides IHostLifetime, *if*
+         - app it's running in Windows
+         - and it is running as a service (using parent process)
+       */
+      .UseWindowsService();
 
-         // pass this command line option to run as a windows service
-         if (args.Contains("--run-as-console")) {
-            Console.Title = host.EndpointName;
+    // Set up dependency injection
+    hb.ConfigureServices((ctx, serviceCollection) => {
+      
+      serviceCollection.AddSingleton(provider => {
+        
+        var logger = provider.GetRequiredService<ILogger<RouterConfiguration>>();
+        var routerConfig = RouterConfiguration.Build(ctx, logger);
 
-            var tcs = new TaskCompletionSource<object>();
-            Console.CancelKeyPress += (sender, e) => { e.Cancel = true; tcs.SetResult(null); };
+        return NServiceBus.Router.Router.Create(routerConfig);
+      });
+      serviceCollection.AddSingleton<IHostedService, RouterHostedService>();
+    });
 
-            await host.Start();
-            await Console.Out.WriteLineAsync("Press Ctrl+C to exit...");
-
-            await tcs.Task;
-            await host.Stop();
-
-            return;
-         }
-
-         using (var windowsService = new WindowsService(host)) {
-            
-            ServiceBase.Run(windowsService);
-         }
-      }
-   }
+    return hb;
+  }
 }
