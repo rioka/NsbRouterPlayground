@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NsbRouterPlayground.Bootstrap;
@@ -28,7 +29,8 @@ internal class Program
       .UseConsoleLifetime()
       .UseNServiceBus(ctx => {
 
-        var endpointConfig = Bootstrapper.Configure(Endpoints.Receiver, ctx.Configuration.GetConnectionString("Data"));
+        var endpointConfig = Bootstrapper.Configure(Endpoints.Receiver, ctx.Configuration.GetConnectionString("Data"), 
+          messages: AssemblyScanner.GetHandledMessages(Assembly.GetExecutingAssembly()));
         return endpointConfig;
       });
 
