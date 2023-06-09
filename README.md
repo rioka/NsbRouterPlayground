@@ -18,13 +18,16 @@
 ```puml
 @startuml
 
+state Sender #44556611
 Sender: sends ""CreateVendor"" command
 Sender: processes ""CreateVendorResponse"" message
 
+state Receiver #66992211
 Receiver: processes ""CreateVendor"" command
 Receiver: publishes ""VendorCreated"" event
 Receiver: replies ""CreateVendorResponse"" message
 
+state Notifier #88112211
 Notifier: processes ""VendorCreated"" event
 
 Sender --> Receiver : ""CreateVendor""
@@ -44,9 +47,11 @@ legend top right
 | ""...."" | Message //moved// by Router |
 endlegend
 
+state Sender #44556611
 Sender: sends ""CreateVendor"" command
 Sender: processes ""CreateVendorResponse"" message
 
+state Router #EEFF2211
 Router: forwards ""CreateVendor"" command to ""Receiver""
 Router: forwards ""CreateVendorResponse"" message to ""Sender""
 Router: forwards ""VendorCreated"" event to ""Notifier""
@@ -55,10 +60,12 @@ Sender -[#red,dashed]right-> Router : **(1)** ""CreateVendor""
 
 Router -[#red,dotted]right-> Receiver : **(2)** ""CreateVendor""  
 
+state Receiver #66992211
 Receiver: process ""CreateVendor"" command
 Receiver: publish ""VendorCreated"" event
 Receiver: reply ""CreateVendorResponse"" message
 
+state Notifier #88112211
 Notifier: process ""VendorCreated"" events
  
 Receiver -[#green,dashed]> Router : **(3)** ""VendorCreated""
@@ -161,7 +168,7 @@ As we can see:
 ```puml
 @startuml
 
-node Sender {
+node Sender #44556611 {
 
   queue router as RtrS
   queue "input queue" as SQ
@@ -169,7 +176,7 @@ node Sender {
   actor Handler as SH
 }
 
-node Receiver {
+node Receiver #66992211 {
 
   queue router as RtrR
   queue "input queue"  as RQ
@@ -177,7 +184,7 @@ node Receiver {
   actor Handler as RH
 }
 
-node Notifier {
+node Notifier #88112211 {
 
   queue router as RtrN
   queue "input queue"  as NQ
@@ -185,7 +192,7 @@ node Notifier {
   actor Handler as NH
 }
 
-component Router
+component Router #EEFF2211 
 'entity Start as St
 
 'St -r-> RtrS
