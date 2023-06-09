@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.Data.SqlClient;
+using NsbRouterPlayground.Common;
 using NsbRouterPlayground.Common.Attributes;
 using NServiceBus;
 
@@ -12,16 +13,16 @@ public class Bootstrapper
     return Endpoint.Start(Configure(endpointName, connectionString));
   }
 
-  public static EndpointConfiguration Configure(
-    string endpointName, 
-    string connectionString, 
-    string? nsbSchema = "nsb", 
+  public static EndpointConfiguration Configure(string endpointName,
+    string connectionString,
+    string nsbSchema = "nsb",
+    string router = Endpoints.Router,
     IEnumerable<Type>? messages = null)
   {
     var config = new EndpointConfiguration(endpointName);
 
     ConfigureConventions(config);
-    ConfigureTransport(config, connectionString, nsbSchema, messages);
+    ConfigureTransport(config, connectionString, nsbSchema, router, messages);
     ConfigurePersistence(config, connectionString, nsbSchema);
 
     config.AuditProcessedMessagesTo("audit");
@@ -44,7 +45,8 @@ public class Bootstrapper
   private static void ConfigureTransport(
     EndpointConfiguration config, 
     string connectionString,
-    string? nsbSchema = null,
+    string nsbSchema,
+    string router,
     IEnumerable<Type>? messages = null)
   {
     var transport = config.UseTransport<SqlServerTransport>();
@@ -57,24 +59,37 @@ public class Bootstrapper
       transport.DefaultSchema(nsbSchema);
     }
 
-    ConfigureRoutes(transport.Routing(), messages ?? Enumerable.Empty<Type>());
+    ConfigureRoutes(transport.Routing(), router, messages ?? Enumerable.Empty<Type>());
   }
 
-  private static void ConfigureRoutes(RoutingSettings<SqlServerTransport> routing, IEnumerable<Type> messages)
+  private static void ConfigureRoutes(
+    RoutingSettings<SqlServerTransport> routing,
+    string router,
+    IEnumerable<Type> messages)
   {
+    var settings = routing.ConnectToRouter(router);
+    
     foreach (var type in messages)
     {
-      var routingInfo = type.GetCustomAttribute<NsbCommandAttribute>();
+      var routingInfo = type.GetCustomAttribute<NsbCommandAttribute>() as Attribute ?? type.GetCustomAttribute<NsbEventAttribute>();
       if (routingInfo is null)
       {
         continue;
       }
 
-      routing.RouteToEndpoint(type, routingInfo.Recipient);
+      switch (routingInfo)
+      {
+        case NsbCommandAttribute command:
+          settings.RouteToEndpoint(type, command.Recipient);
+          break;
+        case NsbEventAttribute @event:
+          settings.RegisterPublisher(type, @event.Publisher);
+          break;
+      }
     }
   }
 
-  private static void ConfigurePersistence(EndpointConfiguration config, string connectionString, string? nsbSchema = null)
+  private static void ConfigurePersistence(EndpointConfiguration config, string connectionString, string nsbSchema)
   {
     var persistence = config.UsePersistence<SqlPersistence>();
     persistence
